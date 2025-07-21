@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript 構文入門</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        .code-font {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+        /* --- Token Interactivity --- */
+        .interactive-code span {
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .interactive-code span:hover {
+            background-color: #4A5568; /* gray-700 */
+        }
+        .highlight {
+            background-color: #2c5282; /* blue-800 */
+            color: white;
+        }
+        
+        /* --- Structure Interactivity --- */
+        .highlightable {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            padding: 4px 2px;
+        }
+        .highlight-statement { border-color: #F6E05E !important; background-color: rgba(246, 224, 94, 0.15) !important; }
+        .highlight-expression { border-color: #68D391 !important; background-color: rgba(104, 211, 145, 0.15) !important; }
+        .highlight-member-expression { border-color: #9F7AEA !important; background-color: rgba(159, 122, 234, 0.15) !important; }
+        .highlight-identifier { border-color: #4FD1C5 !important; background-color: rgba(79, 209, 197, 0.15) !important; }
+        .highlight-literal { border-color: #F6AD55 !important; background-color: rgba(246, 173, 85, 0.15) !important; }
+        .highlight-clause { border-color: #ED64A6 !important; background-color: rgba(237, 100, 166, 0.15) !important; }
+        .highlight-keyword { border-color: #ECC94B !important; background-color: rgba(236, 201, 75, 0.15) !important; }
+
+        /* --- AST Tree Styles --- */
+        .ast-tree, .ast-tree ul { position: relative; padding-left: 20px; list-style: none; }
+        .ast-tree-node { position: relative; padding: 2px 0; }
+        .ast-tree-node::before { content: ""; position: absolute; top: 0; left: -20px; width: 2px; height: 100%; background-color: #4A5568; }
+        .ast-tree-node::after { content: ""; position: absolute; top: 15px; left: -20px; width: 20px; height: 2px; background-color: #4A5568; }
+        .ast-tree-root > .ast-tree-node::before, .ast-tree-root > .ast-tree-node::after { display: none; }
+        .ast-tree-node:last-child::before { height: 15px; }
+        .ast-tree-node .node-content { display: inline-block; cursor: pointer; padding: 4px 8px; border-radius: 6px; border: 2px solid transparent; transition: all 0.2s ease-in-out; margin: 0; }
+        .ast-tree .node-type { font-weight: bold; color: #63B3ED; }
+        .ast-tree .node-value { color: #90CDF4; }
+        .ast-tree .node-prop { color: #F6E05E; }
+
+        /* --- Tab Styles --- */
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #A0AEC0; /* gray-500 */
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #E2E8F0; /* gray-200 */
+            border-bottom-color: #63B3ED; /* blue-400 */
+        }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* --- Badge Styles --- */
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 9999px;
+        }
+        .badge-statement { color: #1A202C; background-color: #F6E05E; }
+        .badge-expression { color: #1A202C; background-color: #68D391; }
+        .badge-clause { color: #1A202C; background-color: #ED64A6; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex flex-col items-center min-h-screen p-4 sm:p-8">
+
+    <main class="w-full max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-white mb-2">JavaScript 構文入門</h1>
+            <p class="text-lg text-gray-400">JavaScript の構文を構成する構造や部品を理解しよう</p>
+        </header>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-white">はじめに：コードの階層構造</h2>
+            <p class="text-gray-400 mb-4">プログラムは、大きな構造から小さな部品へと分解できます。この関係を知ると、コードの見え方が変わります。</p>
+            <ul class="space-y-3 text-gray-300">
+                <li><strong class="text-yellow-400 text-lg">文 (Statement):</strong> コンピュータへの1つの「命令」。「〜せよ」で終わる文章のようなもの。</li>
+                <li><strong class="text-green-400 text-lg">式 (Expression):</strong> 評価すると1つの「値」になるかたまり。計算式や関数呼び出しなど。文の一部であることが多い。</li>
+                <li><strong class="text-pink-400 text-lg">節 (Clause):</strong> <code class="code-font bg-gray-600 px-1 rounded">if</code>文の<code class="code-font bg-gray-600 px-1 rounded">if</code>節や<code class="code-font bg-gray-600 px-1 rounded">else</code>節のように、文の構造を構成するキーワードで始まる意味のまとまり。</li>
+                <li><strong class="text-teal-400 text-lg">トークン (Token):</strong> これ以上分解できない最小単位の「単語」や「記号」。</li>
+            </ul>
+        </section>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-white">ステップ1：部品（トークン）の役割を知る</h2>
+            <p class="text-gray-400 mb-6"><code class="code-font bg-gray-600 px-1 rounded">console.log('Hello, world!');</code> の各部分にマウスカーソルを合わせてみてください。</p>
+            <div class="bg-black rounded-lg p-4 text-xl sm:text-2xl code-font interactive-code mb-4 text-center" id="code-container">
+                <span id="token-console" class="text-sky-400">console</span><span id="token-dot" class="text-gray-500">.</span><span id="token-log" class="text-yellow-400">log</span><span id="token-parens-open" class="text-gray-500">(</span><span id="token-string" class="text-green-400">'Hello, world!'</span><span id="token-parens-close" class="text-gray-500">)</span><span id="token-semicolon" class="text-gray-500">;</span>
+            </div>
+            <div id="explanation-box" class="bg-gray-700 p-5 rounded-lg h-36">
+                <p class="text-gray-300">ここに解説が表示されます。</p>
+            </div>
+        </section>
+
+        <div id="interactive-sync-area-simple">
+            <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8" id="structure-section">
+                <h2 class="text-2xl font-bold mb-4 text-white">ステップ2：単純な構造（文と式）を理解する</h2>
+                <p class="text-gray-400 mb-6">コードのまとまりにカーソルを合わせると、その構造がわかります。下のステップ3のツリーも連動して光ります。</p>
+                <div class="bg-black rounded-lg p-6 text-xl sm:text-2xl code-font interactive-structure text-center" id="structure-container-simple">
+                    <span id="simple-struct-statement" class="highlightable">
+                        <span id="simple-struct-expression" class="highlightable">
+                            <span id="simple-struct-member-expression" class="highlightable"><span id="simple-struct-identifier-console" class="highlightable"><span class="text-sky-400">console</span></span><span class="text-gray-500">.</span><span id="simple-struct-identifier-log" class="highlightable"><span class="text-yellow-400">log</span></span></span><span class="text-gray-500">(</span><span id="simple-struct-literal" class="highlightable"><span class="text-green-400">'Hello, world!'</span></span><span class="text-gray-500">)</span>
+                        </span><span class="text-gray-500">;</span>
+                    </span>
+                </div>
+                <div id="structure-explanation-box-simple" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                    <p class="text-gray-300">ここに解説が表示されます。</p>
+                </div>
+            </section>
+            <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8" id="ast-section-simple">
+                <h2 class="text-2xl font-bold mb-4 text-white">ステップ3：コンピュータの視点 (単純な構文木)</h2>
+                <p class="text-gray-400 mb-6">コンピュータはコードをこの「木」の形で理解します。ツリーの各部分に触れると、ステップ2のコードも連動します。</p>
+                <div class="bg-black p-4 rounded-lg code-font">
+                    <ul class="ast-tree ast-tree-root">
+                        <li class="ast-tree-node">
+                            <div class="node-content" id="simple-ast-statement"><span class="node-type">文 (ExpressionStatement)</span></div>
+                            <ul class="ast-tree">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="simple-ast-expression"><span class="node-type">式 (CallExpression)</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="simple-ast-callee"><span class="node-prop">呼び出すもの (callee)</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="simple-ast-member-expression"><span class="node-type">式 (MemberExpression)</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node"><div class="node-content" id="simple-ast-identifier-console"><span class="node-prop">対象:</span> <span class="node-value">Identifier "console"</span></div></li>
+                                                        <li class="ast-tree-node"><div class="node-content" id="simple-ast-identifier-log"><span class="node-prop">メンバー:</span> <span class="node-value">Identifier "log"</span></div></li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="simple-ast-arguments"><span class="node-prop">引数 (arguments)</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node"><div class="node-content" id="simple-ast-literal"><span class="node-type">値 (Literal):</span> <span class="node-value">'Hello, world!'</span></div></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-white">ステップ4：制御構文を分解する</h2>
+            <p class="text-gray-400 mb-6">条件分岐や繰り返しなど、より複雑な命令の構造を見てみましょう。タブで切り替えてください。</p>
+            <div class="flex border-b border-gray-700 mb-6">
+                <button data-tab="if-statement" class="tab-button active">if 文</button>
+                <button data-tab="for-loop" class="tab-button">for ループ</button>
+                <button data-tab="switch-statement" class="tab-button">switch 文</button>
+            </div>
+            <div id="tab-content">
+                <!-- If Statement Example -->
+                <div id="if-statement" class="tab-pane active">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-if">
+                                <div id="if-struct-statement" class="highlightable inline-block text-left">
+                                    <div>
+                                        <span class="highlightable" id="if-struct-keyword-if"><span class="text-pink-400">if</span></span><span class="text-gray-500"> (</span><span class="highlightable" id="if-struct-test1"><span class="text-sky-400">score</span><span class="text-pink-400"> >= </span><span class="text-teal-300">80</span></span><span class="text-gray-500">) </span><span class="highlightable" id="if-struct-consequent1"><span class="text-gray-500">{ ... }</span></span>
+                                    </div>
+                                    <div class="highlightable" id="if-struct-alternate">
+                                        <span class="highlightable" id="if-struct-keyword-else-if"><span class="text-pink-400">else if</span></span><span class="text-gray-500"> (</span><span class="highlightable" id="if-struct-test2"><span class="text-sky-400">score</span><span class="text-pink-400"> >= </span><span class="text-teal-300">60</span></span><span class="text-gray-500">) </span><span class="highlightable" id="if-struct-consequent2"><span class="text-gray-500">{ ... }</span></span>
+                                        <div class="highlightable" id="if-struct-alternate-final-group">
+                                            <span class="highlightable" id="if-struct-keyword-else"><span class="text-pink-400">else</span></span> <span class="highlightable" id="if-struct-final-alternate"><span class="text-gray-500">{ ... }</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="structure-explanation-box-if" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                            <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="if-ast-statement"><span class="node-type">IfStatement</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node"><div class="node-content" id="if-ast-test1"><span class="node-prop">test:</span> <span class="node-value">BinaryExpression</span></div></li>
+                                        <li class="ast-tree-node"><div class="node-content" id="if-ast-consequent1"><span class="node-prop">consequent:</span> <span class="node-value">BlockStatement</span></div></li>
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="if-ast-alternate"><span class="node-prop">alternate:</span> <span class="node-type">IfStatement</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node"><div class="node-content" id="if-ast-test2"><span class="node-prop">test:</span> <span class="node-value">BinaryExpression</span></div></li>
+                                                <li class="ast-tree-node"><div class="node-content" id="if-ast-consequent2"><span class="node-prop">consequent:</span> <span class="node-value">BlockStatement</span></div></li>
+                                                <li class="ast-tree-node"><div class="node-content" id="if-ast-final-alternate"><span class="node-prop">alternate:</span> <span class="node-value">BlockStatement</span></div></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- For Loop Example -->
+                <div id="for-loop" class="tab-pane">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-for">
+                                <span id="for-struct-statement" class="highlightable">
+                                    <span class="highlightable" id="for-struct-keyword"><span class="text-pink-400">for</span></span><span class="text-gray-500"> (</span><span class="highlightable" id="for-struct-init"><span class="text-pink-400">let</span><span class="text-sky-400"> i</span><span class="text-pink-400"> = </span><span class="text-teal-300">0</span></span><span class="text-gray-500">; </span><span class="highlightable" id="for-struct-test"><span class="text-sky-400">i</span><span class="text-pink-400"> < </span><span class="text-teal-300">5</span></span><span class="text-gray-500">; </span><span class="highlightable" id="for-struct-update"><span class="text-sky-400">i</span><span class="text-pink-400">++</span></span><span class="text-gray-500">) </span><span class="highlightable" id="for-struct-body"><span class="text-gray-500">{ ... }</span></span>
+                                </span>
+                            </div>
+                            <div id="structure-explanation-box-for" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                           <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="for-ast-statement"><span class="node-type">ForStatement</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node"><div class="node-content" id="for-ast-init"><span class="node-prop">init:</span> <span class="node-value">VariableDeclaration</span></div></li>
+                                        <li class="ast-tree-node"><div class="node-content" id="for-ast-test"><span class="node-prop">test:</span> <span class="node-value">BinaryExpression</span></div></li>
+                                        <li class="ast-tree-node"><div class="node-content" id="for-ast-update"><span class="node-prop">update:</span> <span class="node-value">UpdateExpression</span></div></li>
+                                        <li class="ast-tree-node"><div class="node-content" id="for-ast-body"><span class="node-prop">body:</span> <span class="node-value">BlockStatement</span></div></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Switch Statement Example -->
+                <div id="switch-statement" class="tab-pane">
+                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-switch">
+                                <div id="switch-struct-statement" class="highlightable inline-block text-left">
+                                    <span class="highlightable" id="switch-struct-keyword-switch"><span class="text-pink-400">switch</span></span><span class="text-gray-500"> (</span><span class="highlightable" id="switch-struct-discriminant"><span class="text-sky-400">fruit</span></span><span class="text-gray-500">) {</span>
+                                    <div class="pl-4">
+                                        <span class="highlightable" id="switch-struct-case1">
+                                            <span class="highlightable" id="switch-struct-keyword-case1"><span class="text-pink-400">case</span></span> <span class="highlightable" id="switch-struct-test1"><span class="text-green-400">'apple'</span></span><span class="text-gray-500">: ...; </span><span class="highlightable" id="switch-struct-break1"><span class="text-pink-400">break;</span></span>
+                                        </span>
+                                        <br>
+                                        <span class="highlightable" id="switch-struct-case2">
+                                            <span class="highlightable" id="switch-struct-keyword-case2"><span class="text-pink-400">case</span></span> <span class="highlightable" id="switch-struct-test2"><span class="text-green-400">'orange'</span></span><span class="text-gray-500">: ...; </span><span class="highlightable" id="switch-struct-break2"><span class="text-pink-400">break;</span></span>
+                                        </span>
+                                        <br>
+                                        <span class="highlightable" id="switch-struct-default">
+                                            <span class="highlightable" id="switch-struct-keyword-default"><span class="text-pink-400">default</span></span><span class="text-gray-500">: ...;</span>
+                                        </span>
+                                    </div>
+                                    <span class="text-gray-500">}</span>
+                                </div>
+                            </div>
+                            <div id="structure-explanation-box-switch" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                           <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="switch-ast-statement"><span class="node-type">SwitchStatement</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node"><div class="node-content" id="switch-ast-discriminant"><span class="node-prop">discriminant:</span> <span class="node-value">Identifier "fruit"</span></div></li>
+                                        <li class="ast-tree-node">
+                                            <div class="node-content"><span class="node-prop">cases:</span> <span class="node-value">[...]</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="switch-ast-case1"><span class="node-type">SwitchCase</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node"><div class="node-content" id="switch-ast-test1"><span class="node-prop">test:</span> <span class="node-value">Literal 'apple'</span></div></li>
+                                                        <li class="ast-tree-node"><div class="node-content" id="switch-ast-break1"><span class="node-type">BreakStatement</span></div></li>
+                                                    </ul>
+                                                </li>
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="switch-ast-case2"><span class="node-type">SwitchCase</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node"><div class="node-content" id="switch-ast-test2"><span class="node-prop">test:</span> <span class="node-value">Literal 'orange'</span></div></li>
+                                                         <li class="ast-tree-node"><div class="node-content" id="switch-ast-break2"><span class="node-type">BreakStatement</span></div></li>
+                                                    </ul>
+                                                </li>
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="switch-ast-default"><span class="node-type">SwitchCase (default)</span></div>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Token-level Script ---
+            const tokenExplanations = {
+                console: { title: '`console` オブジェクト', text: 'ブラウザの開発者ツール（コンソール）を操作するための機能が詰まった「道具箱」のようなものです。専門用語では「オブジェクト」と呼びます。' },
+                dot: { title: '`.` (ドット演算子)', text: '「〜の」という意味で、左側のオブジェクトが持っている機能やデータにアクセスするために使います。ここでは「consoleの〜」という意味になります。' },
+                log: { title: '`log` メソッド (関数)', text: '`console` オブジェクトが持っている機能の一つで、コンソールにメッセージを記録（log）するためのものです。専門用語では「メソッド」や「関数」と呼びます。' },
+                'parens-open': { title: '`(` (丸括弧の始まり)', text: '関数を実行（呼び出す）ための合図です。この括弧の中に、関数に渡したい情報（引数）を書きます。' },
+                'parens-close': { title: '`)` (丸括弧の終わり)', text: '関数呼び出しの終わりを示します。' },
+                string: { title: '`\'Hello, world!\'` (文字列リテラル)', text: '`log`関数に渡しているデータです。クォーテーションで囲まれた文字の並びを「文字列」と呼びます。これがコンソールに表示される内容になります。' },
+                semicolon: { title: '`;` (セミコロン)', text: '文の終わりを示す記号です。これによって、コンピュータは一つの命令がどこで終わるのかを正確に理解できます。' }
+            };
+            const explanationBox = document.getElementById('explanation-box');
+            const codeContainer = document.getElementById('code-container');
+            const tokenSpans = codeContainer.querySelectorAll('span');
+            const tokenDefaultText = '<p class="text-gray-300">ここに解説が表示されます。</p>';
+            explanationBox.innerHTML = tokenDefaultText;
+            tokenSpans.forEach(span => {
+                span.addEventListener('mouseover', (e) => {
+                    tokenSpans.forEach(s => s.classList.remove('highlight'));
+                    e.target.classList.add('highlight');
+                    const id = e.target.id.replace('token-', '');
+                    const explanation = tokenExplanations[id];
+                    if (explanation) {
+                        const processedTitle = explanation.title.replace(/`([^`]+)`/g, '<code class="code-font bg-gray-600 px-1 rounded">$1</code>');
+                        const processedText = explanation.text.replace(/`([^`]+)`/g, '<code class="code-font bg-gray-600 px-1 rounded">$1</code>');
+                        explanationBox.innerHTML = `<h3 class="text-lg font-bold text-white mb-2">${processedTitle}</h3><p class="text-gray-300">${processedText}</p>`;
+                    }
+                });
+            });
+            codeContainer.addEventListener('mouseout', () => {
+                tokenSpans.forEach(s => s.classList.remove('highlight'));
+                explanationBox.innerHTML = tokenDefaultText;
+            });
+
+            // --- Generic Interactive Setup (REVISED) ---
+            const setupInteractiveArea = (areaId, definitions) => {
+                const syncArea = document.getElementById(areaId);
+                if (!syncArea) return;
+
+                const structureExplanationBox = syncArea.querySelector('[id^="structure-explanation-box"]');
+                const structureDefaultText = '<p class="text-gray-300">ここに解説が表示されます。</p>';
+
+                const idToKeyMap = {};
+                for (const key in definitions) {
+                    const def = definitions[key];
+                    if (def.structId) idToKeyMap[def.structId] = key;
+                    if (def.astId) idToKeyMap[def.astId] = key;
+                }
+
+                const clearHighlights = () => {
+                    for (const key in definitions) {
+                        const def = definitions[key];
+                        if (def.structId) {
+                            const codeSpan = syncArea.querySelector(`#${def.structId}`);
+                            if (codeSpan && def.highlightClass) codeSpan.classList.remove(def.highlightClass);
+                        }
+                        if (def.astId) {
+                            const astNode = syncArea.querySelector(`#${def.astId}`);
+                            if (astNode) {
+                                astNode.style.borderColor = 'transparent';
+                                astNode.style.backgroundColor = 'transparent';
+                            }
+                        }
+                    }
+                };
+
+                const highlightPair = (hoveredId) => {
+                    clearHighlights();
+                    if (!hoveredId) {
+                        if (structureExplanationBox) structureExplanationBox.innerHTML = structureDefaultText;
+                        return;
+                    }
+
+                    const key = idToKeyMap[hoveredId];
+                    if (!key) return;
+
+                    const def = definitions[key];
+                    if (!def) return;
+
+                    if (def.structId) {
+                        const codeSpan = syncArea.querySelector(`#${def.structId}`);
+                        if (codeSpan && def.highlightClass) codeSpan.classList.add(def.highlightClass);
+                    }
+                    if (def.astId) {
+                        const astNode = syncArea.querySelector(`#${def.astId}`);
+                        if (astNode && def.color) {
+                            astNode.style.borderColor = def.color;
+                            const r = parseInt(def.color.slice(1, 3), 16);
+                            const g = parseInt(def.color.slice(3, 5), 16);
+                            const b = parseInt(def.color.slice(5, 7), 16);
+                            astNode.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.15)`;
+                        }
+                    }
+                    
+                    if (structureExplanationBox) {
+                        const badgeHtml = def.badge ? `<span class="badge ${def.badgeClass}">${def.badge}</span>` : '';
+                        const titleMarginClass = def.badge ? 'ml-3' : '';
+                        const processedTitle = def.title.replace(/`([^`]+)`/g, '<code class="code-font bg-gray-600 px-1 rounded">$1</code>');
+                        const processedText = def.text.replace(/`([^`]+)`/g, '<code class="code-font bg-gray-600 px-1 rounded">$1</code>');
+                        structureExplanationBox.innerHTML = `
+                            <div class="flex items-center mb-2">
+                                ${badgeHtml}
+                                <h3 class="text-lg font-bold text-white ${titleMarginClass}">${processedTitle}</h3>
+                            </div>
+                            <p class="text-gray-300">${processedText}</p>
+                        `;
+                    }
+                };
+
+                syncArea.addEventListener('mouseover', e => {
+                    const target = e.target.closest('.highlightable, .node-content');
+                    if (target) {
+                        highlightPair(target.id);
+                    }
+                });
+                syncArea.addEventListener('mouseleave', () => highlightPair(null));
+            };
+
+            // --- Data Definitions ---
+            const simpleDefinitions = {
+                'statement': { badge: '文', badgeClass: 'badge-statement', title: '文 (Statement)', text: 'コンピュータに対する一つの「命令」です。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'simple-struct-statement', astId: 'simple-ast-statement' },
+                'expression': { badge: '式', badgeClass: 'badge-expression', title: '式 (CallExpression)', text: '関数を呼び出す「式」です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'simple-struct-expression', astId: 'simple-ast-expression' },
+                'member-expression': { badge: '式', badgeClass: 'badge-expression', title: '式 (MemberExpression)', text: 'オブジェクトのメンバーにアクセスする「式」です。', highlightClass: 'highlight-member-expression', color: '#9F7AEA', structId: 'simple-struct-member-expression', astId: 'simple-ast-member-expression' },
+                'identifier-console': { title: '識別子 (Identifier)', text: '`console` という名前のオブジェクトを指します。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'simple-struct-identifier-console', astId: 'simple-ast-identifier-console' },
+                'identifier-log': { title: '識別子 (Identifier)', text: '`log` という名前のメンバーを指します。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'simple-struct-identifier-log', astId: 'simple-ast-identifier-log' },
+                'literal': { title: 'リテラル (Literal)', text: 'ソースコードに直接書かれた値そのものです。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'simple-struct-literal', astId: 'simple-ast-literal' },
+                'callee': { badge: '式', badgeClass: 'badge-expression', title: '式: 呼び出すもの (Callee)', text: '呼び出される関数を特定するための式です。ここでは `console.log` という `MemberExpression` (メンバーアクセス式) が該当します。この式が評価された結果（関数）が、続く引数と共に実行されます。', highlightClass: 'highlight-member-expression', color: '#9F7AEA', structId: 'simple-struct-member-expression', astId: 'simple-ast-callee' },
+                'arguments': { title: '役割: 引数 (Arguments)', text: '関数に渡される値のリストです。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'simple-struct-literal', astId: 'simple-ast-arguments' },
+            };
+            setupInteractiveArea('interactive-sync-area-simple', simpleDefinitions);
+
+            const ifDefinitions = {
+                'statement': { badge: '文', badgeClass: 'badge-statement', title: '文 (IfStatement)', text: '条件に応じて処理を分岐させる命令全体です。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'if-struct-statement', astId: 'if-ast-statement' },
+                'keyword-if': { title: 'キーワード `if`', text: '条件分岐を開始する合図です。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'if-struct-keyword-if', astId: 'if-ast-statement' },
+                'test1': { badge: '式', badgeClass: 'badge-expression', title: '条件式 (Test)', text: '最初の条件 `score >= 80` です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'if-struct-test1', astId: 'if-ast-test1' },
+                'consequent1': { title: '実行ブロック (Consequent)', text: '最初の条件がtrueの場合に実行される処理のかたまりです。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'if-struct-consequent1', astId: 'if-ast-consequent1' },
+                'alternate': { badge: '節', badgeClass: 'badge-clause', title: '代替節 (Alternate)', text: '最初の条件がfalseだった場合の、次の分岐処理全体を指します。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'if-struct-alternate', astId: 'if-ast-alternate' },
+                'keyword-else-if': { title: 'キーワード `else if`', text: '前の条件がfalseだった場合に、新たな条件で分岐する合図です。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'if-struct-keyword-else-if', astId: 'if-ast-alternate' },
+                'test2': { badge: '式', badgeClass: 'badge-expression', title: '条件式 (Test)', text: '2番目の条件 `score >= 60` です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'if-struct-test2', astId: 'if-ast-test2' },
+                'consequent2': { title: '実行ブロック (Consequent)', text: '2番目の条件がtrueの場合に実行される処理です。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'if-struct-consequent2', astId: 'if-ast-consequent2' },
+                'alternate-final-group': { badge: '節', badgeClass: 'badge-clause', title: '最終代替節', text: '`else` 以下の部分です。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'if-struct-alternate-final-group', astId: 'if-ast-final-alternate' },
+                'keyword-else': { title: 'キーワード `else`', text: 'どの条件にも当てはまらなかった場合に実行する処理を開始する合図です。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'if-struct-keyword-else', astId: 'if-ast-final-alternate' },
+                'final-alternate': { title: '最終実行ブロック (Alternate)', text: 'どの条件にも当てはまらなかった場合に実行される処理です。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'if-struct-final-alternate', astId: 'if-ast-final-alternate' },
+            };
+            setupInteractiveArea('if-statement', ifDefinitions);
+
+            const forDefinitions = {
+                'statement': { badge: '文', badgeClass: 'badge-statement', title: '文 (ForStatement)', text: '指定した回数だけ処理を繰り返す命令全体です。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'for-struct-statement', astId: 'for-ast-statement' },
+                'keyword': { title: 'キーワード `for`', text: '繰り返し処理を開始する合図です。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'for-struct-keyword', astId: 'for-ast-statement' },
+                'init': { badge: '式', badgeClass: 'badge-expression', title: '初期化式 (Init)', text: 'ループが始まる前に一度だけ実行されます。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'for-struct-init', astId: 'for-ast-init' },
+                'test': { badge: '式', badgeClass: 'badge-expression', title: '条件式 (Test)', text: 'ループを続ける条件です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'for-struct-test', astId: 'for-ast-test' },
+                'update': { badge: '式', badgeClass: 'badge-expression', title: '更新式 (Update)', text: '各回の処理が終わった後に実行されます。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'for-struct-update', astId: 'for-ast-update' },
+                'body': { title: '実行ブロック (Body)', text: 'ループ中に繰り返し実行される処理のかたまりです。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'for-struct-body', astId: 'for-ast-body' },
+            };
+            setupInteractiveArea('for-loop', forDefinitions);
+
+            const switchDefinitions = {
+                'statement': { badge: '文', badgeClass: 'badge-statement', title: '文 (SwitchStatement)', text: 'ある値に応じて処理を多岐に分岐させる命令全体です。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'switch-struct-statement', astId: 'switch-ast-statement' },
+                'keyword-switch': { title: 'キーワード `switch`', text: '多岐分岐を開始する合図です。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'switch-struct-keyword-switch', astId: 'switch-ast-statement' },
+                'discriminant': { badge: '式', badgeClass: 'badge-expression', title: '評価式 (Discriminant)', text: 'どのケースに分岐するかの基準となる値や変数です。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'switch-struct-discriminant', astId: 'switch-ast-discriminant' },
+                'case1': { badge: '節', badgeClass: 'badge-clause', title: 'ケース節 (SwitchCase)', text: '評価式の値が `\'apple\'` だった場合の分岐です。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'switch-struct-case1', astId: 'switch-ast-case1' },
+                'keyword-case1': { title: 'キーワード `case`', text: '分岐の選択肢を定義します。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'switch-struct-keyword-case1', astId: 'switch-ast-case1' },
+                'test1': { badge: '式', badgeClass: 'badge-expression', title: 'テスト式 (Test)', text: 'このケースに一致するかを調べるための値です。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'switch-struct-test1', astId: 'switch-ast-test1' },
+                'break1': { badge: '文', badgeClass: 'badge-statement', title: '文 (BreakStatement)', text: 'switch文の処理をここで中断し、抜け出します。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'switch-struct-break1', astId: 'switch-ast-break1' },
+                'case2': { badge: '節', badgeClass: 'badge-clause', title: 'ケース節 (SwitchCase)', text: '評価式の値が `\'orange\'` だった場合の分岐です。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'switch-struct-case2', astId: 'switch-ast-case2' },
+                'keyword-case2': { title: 'キーワード `case`', text: '分岐の選択肢を定義します。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'switch-struct-keyword-case2', astId: 'switch-ast-case2' },
+                'test2': { badge: '式', badgeClass: 'badge-expression', title: 'テスト式 (Test)', text: 'このケースに一致するかを調べるための値です。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'switch-struct-test2', astId: 'switch-ast-test2' },
+                'break2': { badge: '文', badgeClass: 'badge-statement', title: '文 (BreakStatement)', text: 'switch文の処理をここで中断し、抜け出します。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'switch-struct-break2', astId: 'switch-ast-break2' },
+                'default': { badge: '節', badgeClass: 'badge-clause', title: 'デフォルト節 (SwitchCase)', text: 'どのケースにも一致しなかった場合に実行されます。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'switch-struct-default', astId: 'switch-ast-default' },
+                'keyword-default': { title: 'キーワード `default`', text: '一致するcaseがなかった場合の処理を定義します。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'switch-struct-keyword-default', astId: 'switch-ast-default' },
+            };
+            setupInteractiveArea('switch-statement', switchDefinitions);
+
+            // --- Tab logic ---
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const targetPaneId = tab.getAttribute('data-tab');
+                    tabPanes.forEach(pane => {
+                        pane.classList.toggle('active', pane.id === targetPaneId);
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
