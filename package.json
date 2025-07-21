@@ -1,0 +1,15 @@
+{
+  "name": "programming-instructions",
+  "version": "1.0.0",
+  "description": "プログラミング指導用ドキュメント集",
+  "scripts": {
+    "docs:generate": "node scripts/generate-docs-index.js",
+    "docs:watch": "nodemon --watch docs --ext md,html --ignore docs/index.md --exec \"npm run docs:generate\""
+  },
+  "keywords": ["documentation", "programming", "javascript"],
+  "author": "Japan Expert Force",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
