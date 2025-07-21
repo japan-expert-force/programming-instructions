@@ -1,4 +1,4 @@
-name: Update Docs Index (Script Version)
+name: Update Docs Index
 
 on:
   push:
