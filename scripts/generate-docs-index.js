@@ -75,7 +75,7 @@ function generateDisplayName(file) {
 
 // メイン処理
 function generateDocsIndex() {
-  const docsDir = path.join(__dirname, "docs");
+  const docsDir = path.join(__dirname, "..", "docs");
   const indexPath = path.join(docsDir, "index.md");
 
   if (!fs.existsSync(docsDir)) {
