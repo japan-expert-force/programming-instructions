@@ -6,6 +6,7 @@ on:
     paths:
       - "docs/**"
       - "!docs/index.md" # index.md の変更では実行しない（無限ループ防止）
+  workflow_dispatch:
 
 jobs:
   update-docs-index:
