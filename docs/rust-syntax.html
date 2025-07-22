@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rust 構文入門</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans JP', 'Inter', sans-serif;
+        }
+        .code-font {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+        /* --- Token Interactivity --- */
+        .interactive-code span {
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .interactive-code span:hover {
+            background-color: #4A5568; /* gray-700 */
+        }
+        .highlight {
+            background-color: #2c5282; /* blue-800 */
+            color: white;
+        }
+        
+        /* --- Structure Interactivity --- */
+        .highlightable {
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            border-radius: 6px;
+            border: 2px solid transparent;
+            padding: 4px 2px;
+        }
+        .highlight-statement { border-color: #F6E05E !important; background-color: rgba(246, 224, 94, 0.15) !important; }
+        .highlight-expression { border-color: #68D391 !important; background-color: rgba(104, 211, 145, 0.15) !important; }
+        .highlight-macro-invocation { border-color: #9F7AEA !important; background-color: rgba(159, 122, 234, 0.15) !important; }
+        .highlight-identifier { border-color: #4FD1C5 !important; background-color: rgba(79, 209, 197, 0.15) !important; }
+        .highlight-literal { border-color: #F6AD55 !important; background-color: rgba(246, 173, 85, 0.15) !important; }
+        .highlight-clause { border-color: #ED64A6 !important; background-color: rgba(237, 100, 166, 0.15) !important; }
+        .highlight-keyword { border-color: #ECC94B !important; background-color: rgba(236, 201, 75, 0.15) !important; }
+
+        /* --- AST Tree Styles --- */
+        .ast-tree, .ast-tree ul { position: relative; padding-left: 20px; list-style: none; }
+        .ast-tree-node { position: relative; padding: 2px 0; }
+        .ast-tree-node::before { content: ""; position: absolute; top: 0; left: -20px; width: 2px; height: 100%; background-color: #4A5568; }
+        .ast-tree-node::after { content: ""; position: absolute; top: 15px; left: -20px; width: 20px; height: 2px; background-color: #4A5568; }
+        .ast-tree-root > .ast-tree-node::before, .ast-tree-root > .ast-tree-node::after { display: none; }
+        .ast-tree-node:last-child::before { height: 15px; }
+        .ast-tree-node .node-content { display: inline-block; cursor: pointer; padding: 4px 8px; border-radius: 6px; border: 2px solid transparent; transition: all 0.2s ease-in-out; margin: 0; }
+        .ast-tree .node-type { font-weight: bold; color: #63B3ED; }
+        .ast-tree .node-value { color: #90CDF4; }
+        .ast-tree .node-prop { color: #F6E05E; }
+
+        /* --- Tab Styles --- */
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #A0AEC0; /* gray-500 */
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-button.active {
+            color: #E2E8F0; /* gray-200 */
+            border-bottom-color: #63B3ED; /* blue-400 */
+        }
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* --- Badge Styles --- */
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            vertical-align: baseline;
+            border-radius: 9999px;
+        }
+        .badge-statement { color: #1A202C; background-color: #F6E05E; }
+        .badge-expression { color: #1A202C; background-color: #68D391; }
+        .badge-clause { color: #1A202C; background-color: #ED64A6; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex flex-col items-center min-h-screen p-4 sm:p-8">
+
+    <main class="w-full max-w-5xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-white mb-2">Rust 構文入門</h1>
+            <p class="text-lg text-gray-400">Rustの構文を構成する構造や部品を理解しよう</p>
+        </header>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-white">はじめに：コードの階層構造</h2>
+            <p class="text-gray-400 mb-4">プログラムは、大きな構造から小さな部品へと分解できます。この関係を知ると、コードの見え方が変わります。</p>
+            <ul class="space-y-3 text-gray-300">
+                <li><strong class="text-yellow-400 text-lg">文 (Statement):</strong> 何らかの処理を行い、値を返さない命令。セミコロンで終わる。</li>
+                <li><strong class="text-green-400 text-lg">式 (Expression):</strong> 評価すると1つの「値」になるかたまり。Rustでは <code class="code-font bg-gray-600 px-1 rounded">if</code> やブロック <code class="code-font bg-gray-600 px-1 rounded">{...}</code> も式です。</li>
+                <li><strong class="text-purple-400 text-lg">マクロ (Macro):</strong> コードを生成するコード。`println!` のように `!` が付くのが特徴です。</li>
+                <li><strong class="text-teal-400 text-lg">トークン (Token):</strong> これ以上分解できない最小単位の「単語」や「記号」。</li>
+            </ul>
+        </section>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-white">ステップ1：部品（トークン）の役割を知る</h2>
+            <p class="text-gray-400 mb-6"><code class="code-font bg-gray-600 px-1 rounded">println!("Hello, world!");</code> の各部分にマウスカーソルを合わせてみてください。</p>
+            <div class="bg-black rounded-lg p-4 text-xl sm:text-2xl code-font interactive-code mb-4 text-center" id="code-container">
+                <span id="token-println" class="text-sky-400">println</span><span id="token-bang" class="text-pink-400">!</span><span id="token-parens-open" class="text-gray-500">(</span><span id="token-string" class="text-green-400">"Hello, world!"</span><span id="token-parens-close" class="text-gray-500">)</span><span id="token-semicolon" class="text-gray-500">;</span>
+            </div>
+            <div id="explanation-box" class="bg-gray-700 p-5 rounded-lg h-36">
+                <p class="text-gray-300">ここに解説が表示されます。</p>
+            </div>
+        </section>
+
+        <div id="interactive-sync-area-simple">
+            <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8" id="structure-section">
+                <h2 class="text-2xl font-bold mb-4 text-white">ステップ2：単純な構造（文とマクロ）を理解する</h2>
+                <p class="text-gray-400 mb-6">コードのまとまりにカーソルを合わせると、その構造がわかります。下のステップ3のツリーも連動して光ります。</p>
+                <div class="bg-black rounded-lg p-6 text-xl sm:text-2xl code-font interactive-structure text-center" id="structure-container-simple">
+                    <span id="simple-struct-statement" class="highlightable">
+                        <span id="simple-struct-macro-invocation" class="highlightable">
+                            <span id="simple-struct-identifier-println" class="highlightable"><span class="text-sky-400">println</span></span><span class="text-pink-400">!</span><span class="text-gray-500">(</span><span id="simple-struct-literal" class="highlightable"><span class="text-green-400">"Hello, world!"</span></span><span class="text-gray-500">)</span>
+                        </span>
+                        <span class="text-gray-500">;</span>
+                    </span>
+                </div>
+                <div id="structure-explanation-box-simple" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                    <p class="text-gray-300">ここに解説が表示されます。</p>
+                </div>
+            </section>
+            <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8" id="ast-section-simple">
+                <h2 class="text-2xl font-bold mb-4 text-white">ステップ3：コンパイラの視点 (単純な構文木)</h2>
+                <p class="text-gray-400 mb-6">コンパイラはコードをこの「木」の形で理解します。ツリーの各部分に触れると、ステップ2のコードも連動します。</p>
+                <div class="bg-black p-4 rounded-lg code-font">
+                    <ul class="ast-tree ast-tree-root">
+                        <li class="ast-tree-node">
+                            <div class="node-content" id="simple-ast-statement"><span class="node-type">文 (Statement)</span></div>
+                            <ul class="ast-tree">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="simple-ast-macro-invocation"><span class="node-type">マクロ呼び出し (MacroInvocation)</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="simple-ast-identifier-println"><span class="node-prop">マクロ名:</span> <span class="node-value">Identifier "println"</span></div>
+                                        </li>
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="simple-ast-arguments"><span class="node-prop">引数 (arguments)</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node"><div class="node-content" id="simple-ast-literal"><span class="node-type">値 (Literal):</span> <span class="node-value">"Hello, world!"</span></div></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-white">ステップ4：制御構文を分解する</h2>
+            <p class="text-gray-400 mb-6">条件分岐や繰り返しなど、より複雑な命令の構造を見てみましょう。タブで切り替えてください。</p>
+            <div class="flex border-b border-gray-700 mb-6">
+                <button data-tab="if-expression" class="tab-button active">if 式</button>
+                <button data-tab="for-loop" class="tab-button">for ループ</button>
+                <button data-tab="match-expression" class="tab-button">match 式</button>
+            </div>
+            <div id="tab-content">
+                <!-- If Expression Example -->
+                <div id="if-expression" class="tab-pane active">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-if">
+                                <div id="if-struct-expression" class="highlightable inline-block text-left">
+                                    <div>
+                                        <span class="highlightable" id="if-struct-keyword-if"><span class="text-pink-400">if</span></span> <span class="highlightable" id="if-struct-test1"><span class="text-sky-400">score</span><span class="text-pink-400"> >= </span><span class="text-teal-300">80</span></span> <span class="highlightable" id="if-struct-consequent1"><span class="text-gray-500">{ ... }</span></span>
+                                    </div>
+                                    <div class="highlightable" id="if-struct-alternate">
+                                        <span class="highlightable" id="if-struct-keyword-else-if"><span class="text-pink-400">else if</span></span> <span class="highlightable" id="if-struct-test2"><span class="text-sky-400">score</span><span class="text-pink-400"> >= </span><span class="text-teal-300">60</span></span> <span class="highlightable" id="if-struct-consequent2"><span class="text-gray-500">{ ... }</span></span>
+                                        <div class="highlightable" id="if-struct-alternate-final-group">
+                                            <span class="highlightable" id="if-struct-keyword-else"><span class="text-pink-400">else</span></span> <span class="highlightable" id="if-struct-final-alternate"><span class="text-gray-500">{ ... }</span></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="structure-explanation-box-if" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                            <div class="mt-4 text-right">
+                                <a href="https://doc.rust-jp.rs/book/ch03-05-control-flow.html#if式" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">The Rust Programming Languageで詳しく見る &rarr;</a>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                            <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="if-ast-expression"><span class="node-type">ExprIf</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node"><div class="node-content" id="if-ast-test1"><span class="node-prop">cond:</span> <span class="node-value">ExprBinary (score >= 80)</span></div></li>
+                                        <li class="ast-tree-node"><div class="node-content" id="if-ast-consequent1"><span class="node-prop">then_branch:</span> <span class="node-value">Block</span></div></li>
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="if-ast-alternate"><span class="node-prop">else_branch:</span> <span class="node-type">ExprIf</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node"><div class="node-content" id="if-ast-test2"><span class="node-prop">cond:</span> <span class="node-value">ExprBinary (score >= 60)</span></div></li>
+                                                <li class="ast-tree-node"><div class="node-content" id="if-ast-consequent2"><span class="node-prop">then_branch:</span> <span class="node-value">Block</span></div></li>
+                                                <li class="ast-tree-node"><div class="node-content" id="if-ast-final-alternate"><span class="node-prop">else_branch:</span> <span class="node-value">ExprBlock</span></div></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- For Loop Example -->
+                <div id="for-loop" class="tab-pane">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-for">
+                                <span id="for-struct-statement" class="highlightable">
+                                    <span class="highlightable" id="for-struct-keyword"><span class="text-pink-400">for</span></span> <span class="highlightable" id="for-struct-pattern"><span class="text-sky-400">i</span></span> <span class="highlightable" id="for-struct-keyword-in"><span class="text-pink-400">in</span></span> <span class="highlightable" id="for-struct-iterator"><span class="text-teal-300">0</span><span class="text-pink-400">..</span><span class="text-teal-300">5</span></span> <span class="highlightable" id="for-struct-body"><span class="text-gray-500">{ ... }</span></span>
+                                </span>
+                            </div>
+                            <div id="structure-explanation-box-for" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                             <div class="mt-4 text-right">
+                                <a href="https://doc.rust-jp.rs/book/ch03-05-control-flow.html#forでコレクションをループする" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">The Rust Programming Languageで詳しく見る &rarr;</a>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                           <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="for-ast-statement"><span class="node-type">ExprForLoop</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node"><div class="node-content" id="for-ast-pattern"><span class="node-prop">pat:</span> <span class="node-value">PatIdent "i"</span></div></li>
+                                        <li class="ast-tree-node"><div class="node-content" id="for-ast-iterator"><span class="node-prop">expr:</span> <span class="node-value">ExprRange (0..5)</span></div></li>
+                                        <li class="ast-tree-node"><div class="node-content" id="for-ast-body"><span class="node-prop">body:</span> <span class="node-value">Block</span></div></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Match Expression Example -->
+                <div id="match-expression" class="tab-pane">
+                       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-match">
+                                <div id="match-struct-expression" class="highlightable inline-block text-left">
+                                    <span class="highlightable" id="match-struct-keyword-match"><span class="text-pink-400">match</span></span> <span class="highlightable" id="match-struct-discriminant"><span class="text-sky-400">fruit</span></span><span class="text-gray-500"> {</span>
+                                    <div class="pl-4">
+                                        <span class="highlightable" id="match-struct-arm1">
+                                            <span class="highlightable" id="match-struct-pattern1"><span class="text-green-400">"apple"</span></span> <span class="text-pink-400">=></span> <span class="highlightable" id="match-struct-body1"><span class="text-gray-500">... ,</span></span>
+                                        </span>
+                                        <br>
+                                        <span class="highlightable" id="match-struct-arm2">
+                                            <span class="highlightable" id="match-struct-pattern2"><span class="text-green-400">"orange"</span></span> <span class="text-pink-400">=></span> <span class="highlightable" id="match-struct-body2"><span class="text-gray-500">... ,</span></span>
+                                        </span>
+                                        <br>
+                                        <span class="highlightable" id="match-struct-arm-default">
+                                            <span class="highlightable" id="match-struct-pattern-default"><span class="text-purple-400">_</span></span> <span class="text-pink-400">=></span> <span class="highlightable" id="match-struct-body-default"><span class="text-gray-500">... ,</span></span>
+                                        </span>
+                                    </div>
+                                    <span class="text-gray-500">}</span>
+                                </div>
+                            </div>
+                            <div id="structure-explanation-box-match" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                            <div class="mt-4 text-right">
+                                <a href="https://doc.rust-jp.rs/book/ch06-02-match.html" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">The Rust Programming Languageで詳しく見る &rarr;</a>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                           <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="match-ast-expression"><span class="node-type">ExprMatch</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node"><div class="node-content" id="match-ast-discriminant"><span class="node-prop">expr:</span> <span class="node-value">ExprPath "fruit"</span></div></li>
+                                        <li class="ast-tree-node">
+                                            <div class="node-content"><span class="node-prop">arms:</span> <span class="node-value">[...]</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="match-ast-arm1"><span class="node-type">Arm</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node"><div class="node-content" id="match-ast-pattern1"><span class="node-prop">pat:</span> <span class="node-value">PatLit "apple"</span></div></li>
+                                                        <li class="ast-tree-node"><div class="node-content" id="match-ast-body1"><span class="node-prop">body:</span> <span class="node-value">Expression {...}</span></div></li>
+                                                    </ul>
+                                                </li>
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="match-ast-arm2"><span class="node-type">Arm</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node"><div class="node-content" id="match-ast-pattern2"><span class="node-prop">pat:</span> <span class="node-value">PatLit "orange"</span></div></li>
+                                                        <li class="ast-tree-node"><div class="node-content" id="match-ast-body2"><span class="node-prop">body:</span> <span class="node-value">Expression {...}</span></div></li>
+                                                    </ul>
+                                                </li>
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="match-ast-arm-default"><span class="node-type">Arm</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node"><div class="node-content" id="match-ast-pattern-default"><span class="node-prop">pat:</span> <span class="node-value">PatWild (_)</span></div></li>
+                                                        <li class="ast-tree-node"><div class="node-content" id="match-ast-body-default"><span class="node-prop">body:</span> <span class="node-value">Expression {...}</span></div></li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Token-level Script ---
+            const tokenExplanations = {
+                println: { title: '`println` マクロ', text: 'コンソールに文字列をフォーマットして出力するための「マクロ」です。関数と似ていますが、コンパイル時により多くの仕事ができます。' },
+                bang: { title: '`!` (感嘆符)', text: 'これが関数ではなく「マクロ」の呼び出しであることを示します。`println` と `!` は一体でマクロ名です。' },
+                'parens-open': { title: '`(` (丸括弧の始まり)', text: 'マクロに渡す引数を囲みます。' },
+                'parens-close': { title: '`)` (丸括弧の終わり)', text: '引数の終わりを示します。' },
+                string: { title: '`"Hello, world!"` (文字列リテラル)', text: '`println!`マクロに渡しているデータです。ダブルクォーテーションで囲まれた文字の並びを「文字列リテラル」と呼びます。' },
+                semicolon: { title: '`;` (セミコロン)', text: '文の終わりを示す記号です。Rustでは、式ではなく文であることを明示します。' }
+            };
+            const explanationBox = document.getElementById('explanation-box');
+            const codeContainer = document.getElementById('code-container');
+            const tokenSpans = codeContainer.querySelectorAll('span');
+            const tokenDefaultText = '<p class="text-gray-300">ここに解説が表示されます。</p>';
+            explanationBox.innerHTML = tokenDefaultText;
+            tokenSpans.forEach(span => {
+                span.addEventListener('mouseover', (e) => {
+                    tokenSpans.forEach(s => s.classList.remove('highlight'));
+                    e.target.classList.add('highlight');
+                    const id = e.target.id.replace('token-', '');
+                    const explanation = tokenExplanations[id];
+                    if (explanation) {
+                        const processedTitle = explanation.title.replace(/`([^`]+)`/g, '<code class="code-font bg-gray-600 px-1 rounded">$1</code>');
+                        const processedText = explanation.text.replace(/`([^`]+)`/g, '<code class="code-font bg-gray-600 px-1 rounded">$1</code>');
+                        explanationBox.innerHTML = `<h3 class="text-lg font-bold text-white mb-2">${processedTitle}</h3><p class="text-gray-300">${processedText}</p>`;
+                    }
+                });
+            });
+            codeContainer.addEventListener('mouseout', () => {
+                tokenSpans.forEach(s => s.classList.remove('highlight'));
+                explanationBox.innerHTML = tokenDefaultText;
+            });
+
+            // --- Generic Interactive Setup ---
+            const setupInteractiveArea = (areaId, definitions) => {
+                const syncArea = document.getElementById(areaId);
+                if (!syncArea) return;
+
+                const structureExplanationBox = syncArea.querySelector('[id^="structure-explanation-box"]');
+                const structureDefaultText = '<p class="text-gray-300">ここに解説が表示されます。</p>';
+                if(structureExplanationBox) structureExplanationBox.innerHTML = structureDefaultText;
+
+                const idToKeyMap = {};
+                for (const key in definitions) {
+                    const def = definitions[key];
+                    if (def.structId) idToKeyMap[def.structId] = key;
+                    if (def.astId) idToKeyMap[def.astId] = key;
+                }
+
+                const clearHighlights = () => {
+                    for (const key in definitions) {
+                        const def = definitions[key];
+                        if (def.structId) {
+                            const codeSpan = syncArea.querySelector(`#${def.structId}`);
+                            if (codeSpan && def.highlightClass) codeSpan.classList.remove(def.highlightClass);
+                        }
+                        if (def.astId) {
+                            const astNode = syncArea.querySelector(`#${def.astId}`);
+                            if (astNode) {
+                                astNode.style.borderColor = 'transparent';
+                                astNode.style.backgroundColor = 'transparent';
+                            }
+                        }
+                    }
+                };
+
+                const highlightPair = (hoveredId) => {
+                    clearHighlights();
+                    if (!hoveredId) {
+                        if (structureExplanationBox) structureExplanationBox.innerHTML = structureDefaultText;
+                        return;
+                    }
+
+                    const key = idToKeyMap[hoveredId];
+                    if (!key) return;
+
+                    const def = definitions[key];
+                    if (!def) return;
+
+                    if (def.structId) {
+                        const codeSpan = syncArea.querySelector(`#${def.structId}`);
+                        if (codeSpan && def.highlightClass) codeSpan.classList.add(def.highlightClass);
+                    }
+                    if (def.astId) {
+                        const astNode = syncArea.querySelector(`#${def.astId}`);
+                        if (astNode && def.color) {
+                            astNode.style.borderColor = def.color;
+                            const r = parseInt(def.color.slice(1, 3), 16);
+                            const g = parseInt(def.color.slice(3, 5), 16);
+                            const b = parseInt(def.color.slice(5, 7), 16);
+                            astNode.style.backgroundColor = `rgba(${r}, ${g}, ${b}, 0.15)`;
+                        }
+                    }
+                    
+                    if (structureExplanationBox) {
+                        const badgeHtml = def.badge ? `<span class="badge ${def.badgeClass}">${def.badge}</span>` : '';
+                        const titleMarginClass = def.badge ? 'ml-3' : '';
+                        const processedTitle = def.title.replace(/`([^`]+)`/g, '<code class="code-font bg-gray-600 px-1 rounded">$1</code>');
+                        const processedText = def.text.replace(/`([^`]+)`/g, '<code class="code-font bg-gray-600 px-1 rounded">$1</code>');
+                        structureExplanationBox.innerHTML = `
+                            <div class="flex items-center mb-2">
+                                ${badgeHtml}
+                                <h3 class="text-lg font-bold text-white ${titleMarginClass}">${processedTitle}</h3>
+                            </div>
+                            <p class="text-gray-300">${processedText}</p>
+                        `;
+                    }
+                };
+
+                syncArea.addEventListener('mouseover', e => {
+                    const target = e.target.closest('.highlightable, .node-content');
+                    if (target) {
+                        highlightPair(target.id);
+                    }
+                });
+                syncArea.addEventListener('mouseleave', () => highlightPair(null));
+            };
+
+            // --- Data Definitions ---
+            const simpleDefinitions = {
+                'statement': { badge: '文', badgeClass: 'badge-statement', title: '文 (Statement)', text: 'コンピュータに対する一つの「命令」です。Rustではセミコロンで終わるものは文となり、値を返しません。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'simple-struct-statement', astId: 'simple-ast-statement' },
+                'macro-invocation': { badge: '式', badgeClass: 'badge-expression', title: 'マクロ呼び出し (Macro Invocation)', text: '`println!` マクロを呼び出す「式」です。この式自体は値を返しませんが、文の一部となっています。', highlightClass: 'highlight-macro-invocation', color: '#9F7AEA', structId: 'simple-struct-macro-invocation', astId: 'simple-ast-macro-invocation' },
+                'identifier-println': { title: '識別子 (Identifier)', text: '`println` という名前のマクロを指します。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'simple-struct-identifier-println', astId: 'simple-ast-identifier-println' },
+                'literal': { title: 'リテラル (Literal)', text: 'ソースコードに直接書かれた値そのものです。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'simple-struct-literal', astId: 'simple-ast-literal' },
+                'arguments': { title: '役割: 引数 (Arguments)', text: 'マクロに渡される値のリストです。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'simple-struct-literal', astId: 'simple-ast-arguments' },
+            };
+            setupInteractiveArea('interactive-sync-area-simple', simpleDefinitions);
+
+            const ifDefinitions = {
+                'expression': { badge: '式', badgeClass: 'badge-expression', title: 'IfExpression (ルート)', text: 'if-else-if-else全体を表すルートの式です。Rustの`if`は文ではなく式なので、値を返すことができます。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'if-struct-expression', astId: 'if-ast-expression' },
+                'keyword-if': { title: 'キーワード `if`', text: '条件分岐を開始する合図です。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'if-struct-keyword-if', astId: 'if-ast-expression' },
+                'test1': { badge: '式', badgeClass: 'badge-expression', title: '条件式 (cond)', text: '最初の条件 `score >= 80` の二項演算式です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'if-struct-test1', astId: 'if-ast-test1' },
+                'consequent1': { title: '実行ブロック (then_branch)', text: '最初の条件がtrueの場合に実行されるブロックです。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'if-struct-consequent1', astId: 'if-ast-consequent1' },
+                'alternate': { badge: '式', badgeClass: 'badge-expression', title: 'IfExpression (else_branch)', text: 'else_branchの中にネストされた別のIfExpressionです。これが`else if`部分を表現しています。', highlightClass: 'highlight-statement', color: '#9F7AEA', structId: 'if-struct-alternate', astId: 'if-ast-alternate' },
+                'keyword-else-if': { title: 'キーワード `else if`', text: 'ネストしたIfExpressionの開始を示します。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'if-struct-keyword-else-if', astId: 'if-ast-alternate' },
+                'test2': { badge: '式', badgeClass: 'badge-expression', title: '条件式 (cond)', text: 'ネストしたIfExpressionの条件 `score >= 60` の二項演算式です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'if-struct-test2', astId: 'if-ast-test2' },
+                'consequent2': { title: '実行ブロック (then_branch)', text: 'ネストしたIfExpressionの実行ブロックです。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'if-struct-consequent2', astId: 'if-ast-consequent2' },
+                'alternate-final-group': { badge: '式', badgeClass: 'badge-expression', title: 'ExprBlock (else_branch)', text: 'ネストしたIfExpressionのelse_branchにある最終的なブロック式です。', highlightClass: 'highlight-clause', color: '#4FD1C5', structId: 'if-struct-alternate-final-group', astId: 'if-ast-final-alternate' },
+                'keyword-else': { title: 'キーワード `else`', text: '最終的なブロック式の開始を示します。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'if-struct-keyword-else', astId: 'if-ast-final-alternate' },
+                'final-alternate': { title: 'Block (block)', text: 'ExprBlockの中のBlockです。どの条件にも当てはまらなかった場合に実行される処理です。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'if-struct-final-alternate', astId: 'if-ast-final-alternate' },
+            };
+            setupInteractiveArea('if-expression', ifDefinitions);
+
+            const forDefinitions = {
+                'statement': { badge: '式', badgeClass: 'badge-expression', title: 'ExprForLoop', text: 'for文全体を表す式です。コレクションの各要素に対して処理を繰り返します。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'for-struct-statement', astId: 'for-ast-statement' },
+                'keyword': { title: 'キーワード `for`', text: '繰り返し処理を開始する合図です。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'for-struct-keyword', astId: 'for-ast-statement' },
+                'pattern': { title: 'パターン (pat: PatIdent)', text: 'イテレータから取り出した各要素を束縛する変数名の識別子パターンです。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'for-struct-pattern', astId: 'for-ast-pattern' },
+                'keyword-in': { title: 'キーワード `in`', text: 'パターンとイテレータを区切るキーワードです。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'for-struct-keyword-in', astId: 'for-ast-statement' },
+                'iterator': { badge: '式', badgeClass: 'badge-expression', title: 'ExprRange (expr)', text: '範囲式 `0..5` です。`from`と`to`の両方に`ExprLit`を持つ範囲として表現されます。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'for-struct-iterator', astId: 'for-ast-iterator' },
+                'body': { title: '実行ブロック (body: Block)', text: 'ループ中に繰り返し実行される処理のブロックです。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'for-struct-body', astId: 'for-ast-body' },
+            };
+            setupInteractiveArea('for-loop', forDefinitions);
+
+            const matchDefinitions = {
+                'expression': { badge: '式', badgeClass: 'badge-expression', title: 'ExprMatch', text: 'match式全体です。ある値がどのパターンに一致するかに応じて処理を分岐させる、非常に強力な式です。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'match-struct-expression', astId: 'match-ast-expression' },
+                'keyword-match': { title: 'キーワード `match`', text: 'パターンマッチングを開始する合図です。', highlightClass: 'highlight-keyword', color: '#ECC94B', structId: 'match-struct-keyword-match', astId: 'match-ast-expression' },
+                'discriminant': { badge: '式', badgeClass: 'badge-expression', title: 'ExprPath (expr)', text: 'どのパターンに一致するかを調べる対象となる値です。変数fruitへのパス式です。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'match-struct-discriminant', astId: 'match-ast-discriminant' },
+                'arm1': { badge: '節', badgeClass: 'badge-clause', title: 'アーム (Arm)', text: '`"apple"`パターンと実行する式の組み合わせです。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'match-struct-arm1', astId: 'match-ast-arm1' },
+                'pattern1': { title: 'PatLit (pat)', text: 'リテラルパターンです。`ExprLit`を含む`PatLit`として表現されます。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'match-struct-pattern1', astId: 'match-ast-pattern1' },
+                'body1': { title: '実行部 (body)', text: 'パターンが一致した時に実行される式です。通常はブロック式`{}`や単純な式が来ます。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'match-struct-body1', astId: 'match-ast-body1' },
+                'arm2': { badge: '節', badgeClass: 'badge-clause', title: 'アーム (Arm)', text: '`"orange"`パターンと実行する式の組み合わせです。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'match-struct-arm2', astId: 'match-ast-arm2' },
+                'pattern2': { title: 'PatLit (pat)', text: 'リテラルパターンです。`ExprLit`を含む`PatLit`として表現されます。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'match-struct-pattern2', astId: 'match-ast-pattern2' },
+                'body2': { title: '実行部 (body)', text: 'パターンが一致した時に実行される式です。通常はブロック式`{}`や単純な式が来ます。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'match-struct-body2', astId: 'match-ast-body2' },
+                'arm-default': { badge: '節', badgeClass: 'badge-clause', title: 'アーム (Arm)', text: 'ワイルドカードパターン`_`を使ったアームです。', highlightClass: 'highlight-clause', color: '#ED64A6', structId: 'match-struct-arm-default', astId: 'match-ast-arm-default' },
+                'pattern-default': { title: 'PatWild (pat)', text: 'ワイルドカードパターン`_`です。他のどのパターンにも一致しなかった全ての値に一致します。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'match-struct-pattern-default', astId: 'match-ast-pattern-default' },
+                'body-default': { title: '実行部 (body)', text: 'ワイルドカードに一致した時に実行される式です。通常はブロック式`{}`や単純な式が来ます。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'match-struct-body-default', astId: 'match-ast-body-default' },
+            };
+            setupInteractiveArea('match-expression', matchDefinitions);
+
+            // --- Tab logic ---
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const targetPaneId = tab.getAttribute('data-tab');
+                    tabPanes.forEach(pane => {
+                        pane.classList.toggle('active', pane.id === targetPaneId);
+                        // Trigger a re-setup for the newly activated pane
+                        if (pane.id === targetPaneId) {
+                            if(pane.id === 'if-expression') setupInteractiveArea('if-expression', ifDefinitions);
+                            if(pane.id === 'for-loop') setupInteractiveArea('for-loop', forDefinitions);
+                            if(pane.id === 'match-expression') setupInteractiveArea('match-expression', matchDefinitions);
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
