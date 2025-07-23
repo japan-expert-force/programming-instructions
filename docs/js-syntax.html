@@ -59,7 +59,7 @@
         .ast-tree .node-prop { color: #F6E05E; }
 
         /* --- Tab Styles --- */
-        .tab-button {
+        .tab-button, .tab-button-advanced {
             padding: 0.75rem 1.5rem;
             cursor: pointer;
             border: none;
@@ -70,12 +70,12 @@
             transition: all 0.2s ease-in-out;
             border-bottom: 3px solid transparent;
         }
-        .tab-button.active {
+        .tab-button.active, .tab-button-advanced.active {
             color: #E2E8F0; /* gray-200 */
             border-bottom-color: #63B3ED; /* blue-400 */
         }
-        .tab-pane { display: none; }
-        .tab-pane.active { display: block; }
+        .tab-pane, .advanced-tab-pane { display: none; }
+        .tab-pane.active, .advanced-tab-pane.active { display: block; }
 
         /* --- Badge Styles --- */
         .badge {
@@ -103,7 +103,17 @@
         </header>
 
         <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-white">はじめに：コードの階層構造</h2>
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">はじめに</h2>
+                    <p class="text-sm text-blue-300 font-medium">コードの階層構造</p>
+                </div>
+            </div>
             <p class="text-gray-400 mb-4">プログラムは、大きな構造から小さな部品へと分解できます。この関係を知ると、コードの見え方が変わります。</p>
             <ul class="space-y-3 text-gray-300">
                 <li><strong class="text-yellow-400 text-lg">文 (Statement):</strong> コンピュータへの1つの「命令」。「〜せよ」で終わる文章のようなもの。</li>
@@ -114,7 +124,17 @@
         </section>
 
         <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-white">ステップ1：部品（トークン）の役割を知る</h2>
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-teal-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">ステップ 1</h2>
+                    <p class="text-sm text-green-300 font-medium">部品（トークン）の役割を知る</p>
+                </div>
+            </div>
             <p class="text-gray-400 mb-6"><code class="code-font bg-gray-600 px-1 rounded">console.log('Hello, world!');</code> の各部分にマウスカーソルを合わせてみてください。</p>
             <div class="bg-black rounded-lg p-4 text-xl sm:text-2xl code-font interactive-code mb-4 text-center" id="code-container">
                 <span id="token-console" class="text-sky-400">console</span><span id="token-dot" class="text-gray-500">.</span><span id="token-log" class="text-yellow-400">log</span><span id="token-parens-open" class="text-gray-500">(</span><span id="token-string" class="text-green-400">'Hello, world!'</span><span id="token-parens-close" class="text-gray-500">)</span><span id="token-semicolon" class="text-gray-500">;</span>
@@ -126,7 +146,17 @@
 
         <div id="interactive-sync-area-simple">
             <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8" id="structure-section">
-                <h2 class="text-2xl font-bold mb-4 text-white">ステップ2：単純な構造（文と式）を理解する</h2>
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">ステップ 2</h2>
+                        <p class="text-sm text-yellow-300 font-medium">単純な構造（文と式）を理解する</p>
+                    </div>
+                </div>
                 <p class="text-gray-400 mb-6">コードのまとまりにカーソルを合わせると、その構造がわかります。下のステップ3のツリーも連動して光ります。</p>
                 <div class="bg-black rounded-lg p-6 text-xl sm:text-2xl code-font interactive-structure text-center" id="structure-container-simple">
                     <span id="simple-struct-statement" class="highlightable">
@@ -140,7 +170,17 @@
                 </div>
             </section>
             <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8" id="ast-section-simple">
-                <h2 class="text-2xl font-bold mb-4 text-white">ステップ3：コンピュータの視点 (単純な構文木)</h2>
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-bold text-white">ステップ 3</h2>
+                        <p class="text-sm text-purple-300 font-medium">コンピュータの視点 (単純な構文木)</p>
+                    </div>
+                </div>
                 <p class="text-gray-400 mb-6">コンピュータはコードをこの「木」の形で理解します。ツリーの各部分に触れると、ステップ2のコードも連動します。</p>
                 <div class="bg-black p-4 rounded-lg code-font">
                     <ul class="ast-tree ast-tree-root">
@@ -178,7 +218,17 @@
         </div>
 
         <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
-            <h2 class="text-2xl font-bold mb-4 text-white">ステップ4：制御構文を分解する</h2>
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">ステップ 4</h2>
+                    <p class="text-sm text-indigo-300 font-medium">制御構文を分解する</p>
+                </div>
+            </div>
             <p class="text-gray-400 mb-6">条件分岐や繰り返しなど、より複雑な命令の構造を見てみましょう。タブで切り替えてください。</p>
             <div class="flex border-b border-gray-700 mb-6">
                 <button data-tab="if-statement" class="tab-button active">if 文</button>
@@ -328,6 +378,202 @@
                 </div>
             </div>
         </section>
+
+        <section class="bg-gray-800 p-6 rounded-xl shadow-2xl mb-8">
+            <div class="flex items-center mb-6">
+                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">ステップ 5</h2>
+                    <p class="text-sm text-red-300 font-medium">応用的な構文パターン</p>
+                </div>
+            </div>
+            <p class="text-gray-400 mb-6">基本を理解したら、より複雑で実用的なパターンを見てみましょう。expressionが入れ子になることで、柔軟なコードが書けるようになります。</p>
+            <div class="flex border-b border-gray-700 mb-6">
+                <button data-tab="chained-calls" class="tab-button-advanced active">メソッドチェーン</button>
+                <button data-tab="higher-order" class="tab-button-advanced">高階関数</button>
+                <button data-tab="dynamic-access" class="tab-button-advanced">動的アクセス</button>
+            </div>
+            <div id="advanced-tab-content">
+                <!-- Method Chaining Example -->
+                <div id="chained-calls" class="advanced-tab-pane active">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-chained">
+                                <div id="chained-struct-statement" class="highlightable inline-block text-left">
+                                    <span class="highlightable" id="chained-struct-full-expression">
+                                        <span class="highlightable" id="chained-struct-map-callee">
+                                            <span class="highlightable" id="chained-struct-filter-call">
+                                                <span class="highlightable" id="chained-struct-filter-member">
+                                                    <span class="highlightable" id="chained-struct-object"><span class="text-sky-400">users</span></span><span class="text-gray-500">.</span><span class="highlightable" id="chained-struct-filter-property"><span class="text-yellow-400">filter</span></span>
+                                                </span><span class="text-gray-500">(</span><span class="highlightable" id="chained-struct-filter-arg"><span class="text-sky-400">u</span><span class="text-pink-400"> => </span><span class="text-sky-400">u</span><span class="text-gray-500">.</span><span class="text-yellow-400">active</span></span><span class="text-gray-500">)</span>
+                                            </span>
+                                            <br>&nbsp;&nbsp;&nbsp;&nbsp;<span class="text-gray-500">.</span><span class="highlightable" id="chained-struct-map-member"><span class="text-yellow-400">map</span></span>
+                                        </span><span class="text-gray-500">(</span><span class="highlightable" id="chained-struct-map-arg"><span class="text-sky-400">u</span><span class="text-pink-400"> => </span><span class="text-sky-400">u</span><span class="text-gray-500">.</span><span class="text-yellow-400">name</span></span><span class="text-gray-500">)</span>
+                                    </span><span class="text-gray-500">;</span>
+                                </div>
+                            </div>
+                            <div id="structure-explanation-box-chained" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                            <div class="mt-4 text-right">
+                                <a href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Array" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">配列メソッドについて詳しく &rarr;</a>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                            <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="chained-ast-statement"><span class="node-type">ExpressionStatement</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="chained-ast-full-expression"><span class="node-type">CallExpression</span> <span class="text-xs text-gray-400">(map呼び出し)</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="chained-ast-map-callee"><span class="node-prop">callee:</span> <span class="node-type">MemberExpression</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node">
+                                                            <div class="node-content" id="chained-ast-filter"><span class="node-prop">object:</span> <span class="node-type">CallExpression</span> <span class="text-xs text-gray-400">(filter呼び出し)</span></div>
+                                                            <ul class="ast-tree">
+                                                                <li class="ast-tree-node">
+                                                                    <div class="node-content" id="chained-ast-filter-callee"><span class="node-prop">callee:</span> <span class="node-type">MemberExpression</span></div>
+                                                                    <ul class="ast-tree">
+                                                                        <li class="ast-tree-node"><div class="node-content" id="chained-ast-object"><span class="node-prop">object:</span> <span class="node-value">Identifier "users"</span></div></li>
+                                                                        <li class="ast-tree-node"><div class="node-content" id="chained-ast-filter-property"><span class="node-prop">property:</span> <span class="node-value">Identifier "filter"</span></div></li>
+                                                                    </ul>
+                                                                </li>
+                                                                <li class="ast-tree-node"><div class="node-content" id="chained-ast-filter-arg"><span class="node-prop">arguments:</span> <span class="node-value">[ArrowFunction]</span></div></li>
+                                                            </ul>
+                                                        </li>
+                                                        <li class="ast-tree-node"><div class="node-content" id="chained-ast-map-property"><span class="node-prop">property:</span> <span class="node-value">Identifier "map"</span></div></li>
+                                                    </ul>
+                                                </li>
+                                                <li class="ast-tree-node"><div class="node-content" id="chained-ast-map-arg"><span class="node-prop">arguments:</span> <span class="node-value">[ArrowFunction]</span></div></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Higher-order Function Example -->
+                <div id="higher-order" class="advanced-tab-pane">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-higher">
+                                <div id="higher-struct-statement" class="highlightable inline-block text-left">
+                                    <span class="highlightable" id="higher-struct-full-expression">
+                                        <span class="highlightable" id="higher-struct-callee">
+                                            <span class="highlightable" id="higher-struct-get-handler"><span class="text-yellow-400">getEventHandler</span></span><span class="text-gray-500">(</span><span class="highlightable" id="higher-struct-handler-arg"><span class="text-green-400">'click'</span></span><span class="text-gray-500">)</span>
+                                        </span>
+                                        <span class="text-gray-500">(</span><span class="highlightable" id="higher-struct-event-arg"><span class="text-sky-400">event</span></span><span class="text-gray-500">)</span>
+                                    </span><span class="text-gray-500">;</span>
+                                </div>
+                            </div>
+                            <div id="structure-explanation-box-higher" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                            <div class="mt-4 text-right">
+                                <a href="https://developer.mozilla.org/ja/docs/Glossary/First-class_Function" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">高階関数について詳しく &rarr;</a>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                            <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="higher-ast-statement"><span class="node-type">ExpressionStatement</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="higher-ast-full-expression"><span class="node-type">CallExpression</span> <span class="text-xs text-gray-400">(戻り値の関数を実行)</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="higher-ast-callee"><span class="node-prop">callee:</span> <span class="node-type">CallExpression</span> <span class="text-xs text-gray-400">(関数を取得)</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node"><div class="node-content" id="higher-ast-get-handler"><span class="node-prop">callee:</span> <span class="node-value">Identifier "getEventHandler"</span></div></li>
+                                                        <li class="ast-tree-node"><div class="node-content" id="higher-ast-handler-arg"><span class="node-prop">arguments:</span> <span class="node-value">[StringLiteral 'click']</span></div></li>
+                                                    </ul>
+                                                </li>
+                                                <li class="ast-tree-node"><div class="node-content" id="higher-ast-event-arg"><span class="node-prop">arguments:</span> <span class="node-value">[Identifier "event"]</span></div></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dynamic Access Example -->
+                <div id="dynamic-access" class="advanced-tab-pane">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div>
+                            <div class="bg-black rounded-lg p-4 code-font text-lg interactive-structure text-center" id="structure-container-dynamic">
+                                <div id="dynamic-struct-statement" class="highlightable inline-block text-left">
+                                    <span class="highlightable" id="dynamic-struct-full-expression">
+                                        <span class="highlightable" id="dynamic-struct-callee">
+                                            <span class="highlightable" id="dynamic-struct-object"><span class="text-sky-400">obj</span></span>
+                                            <span class="text-gray-500">[</span>
+                                            <span class="highlightable" id="dynamic-struct-property">
+                                                <span class="highlightable" id="dynamic-struct-method-name"><span class="text-green-400">'get'</span></span>
+                                                <span class="text-pink-400"> + </span>
+                                                <span class="highlightable" id="dynamic-struct-capitalize">
+                                                    <span class="highlightable" id="dynamic-struct-capitalize-callee"><span class="text-yellow-400">capitalize</span></span><span class="text-gray-500">(</span><span class="highlightable" id="dynamic-struct-field-arg"><span class="text-sky-400">field</span></span><span class="text-gray-500">)</span>
+                                                </span>
+                                            </span>
+                                            <span class="text-gray-500">]</span>
+                                        </span><span class="text-gray-500">(</span><span class="highlightable" id="dynamic-struct-arguments"><span class="text-teal-300">42</span></span><span class="text-gray-500">)</span>
+                                    </span><span class="text-gray-500">;</span>
+                                </div>
+                            </div>
+                            <div id="structure-explanation-box-dynamic" class="bg-gray-700 p-5 rounded-lg h-48 mt-6">
+                                <p class="text-gray-300">ここに解説が表示されます。</p>
+                            </div>
+                            <div class="mt-4 text-right">
+                                <a href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Operators/Property_accessors" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">プロパティアクセサについて詳しく &rarr;</a>
+                            </div>
+                        </div>
+                        <div class="bg-black p-4 rounded-lg code-font">
+                            <ul class="ast-tree ast-tree-root">
+                                <li class="ast-tree-node">
+                                    <div class="node-content" id="dynamic-ast-statement"><span class="node-type">ExpressionStatement</span></div>
+                                    <ul class="ast-tree">
+                                        <li class="ast-tree-node">
+                                            <div class="node-content" id="dynamic-ast-full-expression"><span class="node-type">CallExpression</span></div>
+                                            <ul class="ast-tree">
+                                                <li class="ast-tree-node">
+                                                    <div class="node-content" id="dynamic-ast-callee"><span class="node-prop">callee:</span> <span class="node-type">MemberExpression</span> <span class="text-xs text-gray-400">(computed)</span></div>
+                                                    <ul class="ast-tree">
+                                                        <li class="ast-tree-node"><div class="node-content" id="dynamic-ast-object"><span class="node-prop">object:</span> <span class="node-value">Identifier "obj"</span></div></li>
+                                                        <li class="ast-tree-node">
+                                                            <div class="node-content" id="dynamic-ast-property"><span class="node-prop">property:</span> <span class="node-type">BinaryExpression</span> <span class="text-xs text-gray-400">(+)</span></div>
+                                                            <ul class="ast-tree">
+                                                                <li class="ast-tree-node"><div class="node-content" id="dynamic-ast-method-name"><span class="node-prop">left:</span> <span class="node-value">StringLiteral 'get'</span></div></li>
+                                                                <li class="ast-tree-node">
+                                                                    <div class="node-content" id="dynamic-ast-capitalize"><span class="node-prop">right:</span> <span class="node-type">CallExpression</span></div>
+                                                                    <ul class="ast-tree">
+                                                                        <li class="ast-tree-node"><div class="node-content" id="dynamic-ast-capitalize-callee"><span class="node-prop">callee:</span> <span class="node-value">Identifier "capitalize"</span></div></li>
+                                                                        <li class="ast-tree-node"><div class="node-content" id="dynamic-ast-field-arg"><span class="node-prop">arguments:</span> <span class="node-value">[Identifier "field"]</span></div></li>
+                                                                    </ul>
+                                                                </li>
+                                                            </ul>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                                <li class="ast-tree-node"><div class="node-content" id="dynamic-ast-arguments"><span class="node-prop">arguments:</span> <span class="node-value">[NumericLiteral 42]</span></div></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <footer style="text-align: center; color: #aaaaaa;">
             Generated by Gemini 2.5 Pro
         </footer>
@@ -370,7 +616,18 @@
 
             // --- Generic Interactive Setup (REVISED) ---
             const setupInteractiveArea = (areaId, definitions) => {
-                const syncArea = document.getElementById(areaId);
+                // For advanced tabs, search within the specific advanced tab pane
+                let syncArea = document.getElementById(areaId);
+                if (!syncArea) {
+                    // If not found directly, search within advanced tab panes
+                    const advancedPanes = document.querySelectorAll('.advanced-tab-pane');
+                    for (const pane of advancedPanes) {
+                        if (pane.id === areaId) {
+                            syncArea = pane;
+                            break;
+                        }
+                    }
+                }
                 if (!syncArea) return;
 
                 const structureExplanationBox = syncArea.querySelector('[id^="structure-explanation-box"]');
@@ -507,9 +764,54 @@
             };
             setupInteractiveArea('switch-statement', switchDefinitions);
 
+            // --- Advanced tab definitions ---
+            const chainedDefinitions = {
+                'statement': { badge: '文', badgeClass: 'badge-statement', title: '文 (ExpressionStatement)', text: 'メソッドチェーンを含む式文です。複数のメソッドを連鎖的に呼び出しています。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'chained-struct-statement', astId: 'chained-ast-statement' },
+                'full-expression': { badge: '式', badgeClass: 'badge-expression', title: 'メソッドチェーン全体 (CallExpression)', text: '最外側のmap()呼び出しです。filter()の戻り値（配列）に対してmap()を実行しています。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'chained-struct-full-expression', astId: 'chained-ast-full-expression' },
+                'object': { title: '元の配列 (Identifier)', text: 'メソッドチェーンの起点となる配列オブジェクトです。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'chained-struct-object', astId: 'chained-ast-object' },
+                'filter-call': { badge: '式', badgeClass: 'badge-expression', title: 'filter()呼び出し (CallExpression)', text: '配列から条件に合う要素だけを抽出するメソッドです。新しい配列を返します。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'chained-struct-filter-call', astId: 'chained-ast-filter' },
+                'filter-member': { badge: '式', badgeClass: 'badge-expression', title: 'filter()メンバーアクセス (MemberExpression)', text: 'usersオブジェクトのfilterメソッドへのアクセスです。', highlightClass: 'highlight-member-expression', color: '#9F7AEA', structId: 'chained-struct-filter-member', astId: 'chained-ast-filter-callee' },
+                'filter-arg': { title: 'filter()の引数 (ArrowFunction)', text: '各要素をテストする関数（アロー関数）です。activeプロパティがtrueの要素のみを通します。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'chained-struct-filter-arg', astId: 'chained-ast-filter-arg' },
+                'map-member': { title: 'map()メソッド (Identifier)', text: 'filter結果のmapメソッド名です。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'chained-struct-map-member', astId: 'chained-ast-map-property' },
+                'map-arg': { title: 'map()の引数 (ArrowFunction)', text: '各要素を変換する関数です。ユーザーオブジェクトからnameプロパティだけを取り出します。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'chained-struct-map-arg', astId: 'chained-ast-map-arg' },
+                'filter-property': { title: 'filter プロパティ (Identifier)', text: 'usersオブジェクトのfilterプロパティを指します。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'chained-struct-filter-property', astId: 'chained-ast-filter-property' },
+                'map-callee': { badge: '式', badgeClass: 'badge-expression', title: 'map()メンバーアクセス (MemberExpression)', text: 'filter結果のmapメソッドへのアクセスです。', highlightClass: 'highlight-member-expression', color: '#9F7AEA', structId: 'chained-struct-map-callee', astId: 'chained-ast-map-callee' },
+            };
+            setupInteractiveArea('chained-calls', chainedDefinitions);
+
+            const higherDefinitions = {
+                'statement': { badge: '文', badgeClass: 'badge-statement', title: '文 (ExpressionStatement)', text: '高階関数の戻り値（関数）を即座に呼び出している式文です。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'higher-struct-statement', astId: 'higher-ast-statement' },
+                'full-expression': { badge: '式', badgeClass: 'badge-expression', title: '関数呼び出し (CallExpression)', text: 'getEventHandler()が返した関数を即座に実行しています。calleeが式（関数呼び出し）になっているのが特徴です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'higher-struct-full-expression', astId: 'higher-ast-full-expression' },
+                'callee': { badge: '式', badgeClass: 'badge-expression', title: '呼び出される関数 (CallExpression)', text: 'getEventHandler()の戻り値である関数が、実際に呼び出される対象です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'higher-struct-callee', astId: 'higher-ast-callee' },
+                'get-handler': { title: 'getEventHandler関数 (Identifier)', text: 'イベントタイプに応じた適切なハンドラー関数を返す高階関数の名前です。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'higher-struct-get-handler', astId: 'higher-ast-get-handler' },
+                'handler-arg': { title: 'ハンドラー取得の引数 (Literal)', text: 'どのタイプのイベントハンドラーが欲しいかを指定する文字列です。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'higher-struct-handler-arg', astId: 'higher-ast-handler-arg' },
+                'event-arg': { title: 'イベント引数 (Identifier)', text: '取得したハンドラー関数に渡すイベントオブジェクトです。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'higher-struct-event-arg', astId: 'higher-ast-event-arg' },
+            };
+            setupInteractiveArea('higher-order', higherDefinitions);
+
+            const dynamicDefinitions = {
+                'statement': { badge: '文', badgeClass: 'badge-statement', title: '文 (ExpressionStatement)', text: '動的プロパティアクセスと関数呼び出しを組み合わせた式文です。', highlightClass: 'highlight-statement', color: '#F6E05E', structId: 'dynamic-struct-statement', astId: 'dynamic-ast-statement' },
+                'full-expression': { badge: '式', badgeClass: 'badge-expression', title: '動的メソッド呼び出し (CallExpression)', text: '計算されたプロパティ名を使ってメソッドを呼び出しています。実行時に決まるメソッド名に対応できます。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'dynamic-struct-full-expression', astId: 'dynamic-ast-full-expression' },
+                'object': { title: '対象オブジェクト (Identifier)', text: 'メソッドを呼び出す対象のオブジェクトです。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'dynamic-struct-object', astId: 'dynamic-ast-object' },
+                'property': { badge: '式', badgeClass: 'badge-expression', title: 'プロパティ名の式 (BinaryExpression)', text: '文字列の連結でメソッド名を動的に生成しています。"get" + "Name" = "getName"のような形です。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'dynamic-struct-property', astId: 'dynamic-ast-property' },
+                'method-name': { title: 'メソッド名プレフィックス (Literal)', text: 'getter メソッドの共通プレフィックス "get" です。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'dynamic-struct-method-name', astId: 'dynamic-ast-method-name' },
+                'capitalize': { badge: '式', badgeClass: 'badge-expression', title: 'capitalize()呼び出し (CallExpression)', text: 'フィールド名の先頭を大文字にする関数です。"name" → "Name" のような変換を行います。', highlightClass: 'highlight-expression', color: '#68D391', structId: 'dynamic-struct-capitalize', astId: 'dynamic-ast-capitalize' },
+                'field-arg': { title: 'フィールド名 (Identifier)', text: '動的にアクセスしたいプロパティの基本名です。これがcapitalizeされてメソッド名の一部になります。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'dynamic-struct-field-arg', astId: 'dynamic-ast-field-arg' },
+                'callee': { badge: '式', badgeClass: 'badge-expression', title: 'MemberExpression (computed)', text: '動的にプロパティアクセスするMemberExpressionです。computedプロパティがtrueになります。', highlightClass: 'highlight-member-expression', color: '#9F7AEA', structId: 'dynamic-struct-callee', astId: 'dynamic-ast-callee' },
+                'capitalize-callee': { title: 'capitalize関数 (Identifier)', text: 'capitalize関数を指すIdentifierです。', highlightClass: 'highlight-identifier', color: '#4FD1C5', structId: 'dynamic-struct-capitalize-callee', astId: 'dynamic-ast-capitalize-callee' },
+                'arguments': { title: '関数の引数 (Array)', text: '動的に生成されたメソッドに渡す引数のリストです。この例では数値42を渡しています。', highlightClass: 'highlight-literal', color: '#F6AD55', structId: 'dynamic-struct-arguments', astId: 'dynamic-ast-arguments' },
+            };
+            setupInteractiveArea('dynamic-access', dynamicDefinitions);
+
+            // Initialize the first advanced tab on page load
+            setupInteractiveArea('chained-calls', chainedDefinitions);
+
             // --- Tab logic ---
             const tabs = document.querySelectorAll('.tab-button');
             const tabPanes = document.querySelectorAll('.tab-pane');
+            const advancedTabs = document.querySelectorAll('.tab-button-advanced');
+            const advancedTabPanes = document.querySelectorAll('.advanced-tab-pane');
+            
             tabs.forEach(tab => {
                 tab.addEventListener('click', () => {
                     tabs.forEach(t => t.classList.remove('active'));
@@ -517,6 +819,23 @@
                     const targetPaneId = tab.getAttribute('data-tab');
                     tabPanes.forEach(pane => {
                         pane.classList.toggle('active', pane.id === targetPaneId);
+                    });
+                });
+            });
+
+            advancedTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    advancedTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    const targetPaneId = tab.getAttribute('data-tab');
+                    advancedTabPanes.forEach(pane => {
+                        pane.classList.toggle('active', pane.id === targetPaneId);
+                        // Re-setup interactive areas when switching tabs
+                        if (pane.classList.contains('active')) {
+                            if (pane.id === 'chained-calls') setupInteractiveArea('chained-calls', chainedDefinitions);
+                            if (pane.id === 'higher-order') setupInteractiveArea('higher-order', higherDefinitions);
+                            if (pane.id === 'dynamic-access') setupInteractiveArea('dynamic-access', dynamicDefinitions);
+                        }
                     });
                 });
             });
